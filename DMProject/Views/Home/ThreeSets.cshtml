@@ -1,0 +1,177 @@
+﻿@model DMProject.Models.SetOperations
+@{
+    ViewBag.Title = "ThreeSets";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+
+    .chartCard {
+        width: 100vw;
+        height: calc(100vh - 40px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .chartBox {
+        width: 700px;
+        padding: 20px;
+        border-radius: 20px;
+        border: solid 3px rgba(54, 162, 235, 1);
+        background: white;
+    }
+
+        .chartBox viewBtn {
+            color: black;
+            border: 1px solid white;
+        }
+</style>
+
+
+@using (Html.BeginForm("ThreeSets", "Home", FormMethod.Post))
+{
+    <div class="row">
+        <div class="col-12 grid-margin">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">Set Operations</h4>
+                    <p class="card-description">
+                        This includes all core operations of sets
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">Set A: </label>
+                                <div class="col-sm-9">
+                                    @Html.EditorFor(m => Model.A, new { htmlAttributes = new { @class = "form-control", @placeholder = "Separate each number by comma" } })
+                                    @Html.ValidationMessageFor(m => Model.A, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">Set B: </label>
+                                <div class="col-sm-9">
+                                    @Html.EditorFor(m => Model.B, new { htmlAttributes = new { @class = "form-control", @placeholder = "Separate each number by comma" } })
+                                    @Html.ValidationMessageFor(m => Model.B, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">Set C: </label>
+                                <div class="col-sm-9">
+                                    @Html.EditorFor(m => Model.C, new { htmlAttributes = new { @class = "form-control", @placeholder = "Separate each number by comma" } })
+                                    @Html.ValidationMessageFor(m => Model.C, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group row">
+                                <label class="col-sm-3 col-form-label">Expression: </label>
+                                <div class="col-sm-9">
+                                    @Html.EditorFor(m => Model.Expression, new { htmlAttributes = new { @class = "form-control", @placeholder = "Expression" } })
+                                    @Html.ValidationMessageFor(m => Model.Expression, "", new { @class = "text-danger" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="submit" id="btnSubmit" value="Submit" class="btn btn-primary" />
+                    <input type="button" id="btnVenn" value="Show" class="btn btn-success" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<div class="row">
+    <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Summary</h4>
+                <p class="card-description">
+                </p>
+                <div class="table-responsive table-hover">
+                    <table class="table" id="SetsSummary">
+                        <thead>
+                            <tr>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="text/javascript" src="https://unpkg.com/chartjs-chart-venn@3.6.0/build/index.umd.min.js"></script>
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+
+
+<script>
+    var sets = [];
+    var a = $("#A").val();
+    var b = $("#B").val();
+    var c = $("#C").val();
+
+
+
+
+        $("#btnVenn").click(function () {
+            $.ajax({
+                type: "Get",
+                url: '@Url.Action("DynamicTable", "Home")',
+                /*data: JSON.stringify({ a: a, b: b }),*/
+                contentType: 'application/json',
+                success: function (db) {
+                    sets = db;
+                    var headers = [];
+                    $('#SetsSummary thead tr').append('<th>Sno.</th>');
+                    $('#SetsSummary thead tr').append('<th>A</th>');
+                    $('#SetsSummary thead tr').append('<th>B</th>');
+                    $('#SetsSummary thead tr').append('<th>C</th>');
+                    for (var i = 0; i < sets.BreakPoints.length; i++) {
+                        $('#SetsSummary thead tr').append('<th>' + sets.BreakPoints[i] + '</th>');
+                    }
+                    $('#SetsSummary tbody').append('<td>' + 1 + '</td>');
+                    $('#SetsSummary tbody').append('<td>{' + a + '}</td>');
+                    $('#SetsSummary tbody').append('<td>{' + b + '}</td>');
+                    $('#SetsSummary tbody').append('<td>{' + c + '}</td>');
+                    for (var i = 0; i < sets.Result.length; i++) {
+                        $('#SetsSummary tbody').append('<td>{' + sets.Result[i] + '}</td>');
+                    }
+                    $('#SetsSummary thead tr').append('<th>Venn Diagram</th>');
+                    $('#SetsSummary tbody').append('<td>' + "<button class='btn btn-primary digram'>View</button>" + '</td>');
+                },
+
+            });
+        });
+
+
+
+    $("body").on("click", ".digram", function (ev) {
+        window.location.href = "/Home/DynamicVennDiagram";
+    });
+
+
+
+
+    
+
+
+</script>

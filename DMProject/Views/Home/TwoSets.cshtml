@@ -1,0 +1,155 @@
+﻿
+@{
+    ViewBag.Title = "TwoSets";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+
+<div class="row">
+    <div class="col-12 grid-margin">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Set Operations</h4>
+                <p class="card-description">
+                    This includes all core operations of sets
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Set 1: </label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="set1" placeholder="Separate each number by comma">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Set 2: </label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="set2" placeholder="Separate each number by comma">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input type="submit" id="btnSubmit" value="Submit" class="btn btn-primary" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-lg-12 grid-margin stretch-card">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Summary</h4>
+                <p class="card-description">
+                    U stands for Universal
+                </p>
+                <div class="table-responsive table-hover">
+                    <table class="table" id="SetsSummary">
+                        <thead>
+                            <tr>
+                                <th>Sno.</th>
+                                <th>Set1(A)</th>
+                                <th>Set2(B)</th>
+                                <th>Symbol</th>
+                                <th>Operation</th>
+                                <th>Result</th>
+                                <th>Venn Digram</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+
+<script>
+    var sets = [];
+    $("#btnSubmit").click(function () {
+        var a = $('#set1').val();
+        var b = $('#set2').val();
+
+        $('#SetsSummary tbody').empty();
+
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("Calculate", "Home")',
+            data: JSON.stringify({ a: a, b: b }),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data.length > 0) {
+                    sets = data;
+                    for (var i = 0; i < data.length; i++)
+                    {
+                        if (data[i].Universal != null && data[i].A != null) {
+                            $('#SetsSummary tbody').append('<tr><td>' + data[i].Sno + '</td><td>' + data[i].A + '</td><td>U:' + data[i].Universal + '</td><td>' + data[i].Symbol + '</td><td>A' + "<sup>" + data[i].Operation + "</sup>" + '</td><td>' + data[i].Result + '</td><td>' + "<button class='btn btn-primary digram'>View</button>"+'</td></tr>');
+                        }
+                        else if (data[i].Universal != null && data[i].B != null) {
+                            $('#SetsSummary tbody').append('<tr><td>' + data[i].Sno + '</td><td>U:' + data[i].Universal + '</td><td>' + data[i].B + '</td><td>' + data[i].Symbol + '</td><td>B' + "<sup>" + data[i].Operation + "</sup>" + '</td><td>' + data[i].Result + '</td><td>' + "<button class='btn btn-primary digram'>View</button>" +'</td></tr>');
+                        }
+                        else {
+                            $('#SetsSummary tbody').append('<tr><td>' + data[i].Sno + '</td><td>' + data[i].A + '</td><td>' + data[i].B + '</td><td>' + data[i].Symbol + '</td><td>' + data[i].Operation + '</td><td>' + data[i].Result + '</td><td>' + "<button class='btn btn-primary digram'>View</button>" +'</td></tr>');
+                        }
+                    }
+                }
+
+            },
+             //error: function () {
+                        //    alert('fail');
+                        //}
+
+
+
+        });
+
+    });
+
+
+    $("body").on("click", ".digram", function (ev) {
+        var currentRow = this.parentNode.parentNode;
+        let sno  = currentRow.children[0].innerText;
+        const index = sets.findIndex(item => item.Sno === parseInt(sno));
+
+        var json = JSON.stringify(sets[index]);
+
+        var data = JSON.stringify({
+            "sets": sets[index]
+        });
+        window.location.href = "/Home/VennDiagram?sno=" + parseInt(sno);
+        /*window.location.href = "/Home/VennDiagram?data=" + encodeURIComponent(json);*/
+
+        @*var url = '@Html.Raw(Url.Action("VennDiagram", "Home", new { obj = "__productId__"}))';
+        var param = url.replace('__productId__', json);
+        window.location.href = param;*@
+
+
+        @*$.ajax({
+            type: "POST",
+            url: '@Url.Action("Check", "Home")',
+            data: data,
+            contentType: 'application/json',
+            success: function (data) {
+                window.location.href = "/Home/VennDiagram";
+
+            },
+        });*@
+
+
+    });
+
+
+
+</script>

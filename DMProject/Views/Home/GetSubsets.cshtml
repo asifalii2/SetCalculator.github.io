@@ -1,0 +1,85 @@
+﻿
+@{
+    ViewBag.Title = "GetSubsets";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row">
+    <div class="col-12 grid-margin">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title">Power Sets</h4>
+                <p class="card-description">
+                    It will return the power set
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Set: </label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="set" value="" placeholder="Separate each number by comma">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label">Power Set: </label>
+                            <div class="col-sm-9">
+                                <textarea type="text" rows="6" class="form-control" id="powerset" placeholder=""></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="card-description" id="description">
+                    
+                </p>
+
+                <input type="submit" id="btnSubmit" value="Submit" class="btn btn-primary" />
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+
+<script>
+    $("#btnSubmit").click(function () {
+
+        var a = $('#set').val();
+        var l = Math.pow(2, a.split(',').length);
+
+
+        if (l <= 16) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("PowerSubset", "Home")',
+                data: JSON.stringify({ powerSet: a }),
+                contentType: 'application/json',
+                success: function (data) {
+                    if (data == "" || data == null) {
+                        alert("Set value should not be null");
+                    }
+                    else {
+                        $("#powerset").text(data);
+                        $("#description").text('Note: Total no of subsets are always equal to 2^n which is equal to (' + l + ') where n is equal to total no of elements in set.');
+                    }
+                    
+                },
+            });
+
+        }
+        else {
+            alert("Set value should not be greater than 4");
+        }
+
+
+
+
+
+
+    });
+</script>
